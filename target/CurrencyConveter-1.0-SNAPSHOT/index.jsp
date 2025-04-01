@@ -3,10 +3,11 @@
     Created on : Mar 27, 2025, 4:56:52 PM
     Author     : cellul4r
 --%>
-
+<%@page import="main.CurrencyConverter"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<jsp:useBean id="currencyConverter" scope="session" class="main.CurrencyConverter" />
-
+<%! CurrencyConverter currencyConverter = new CurrencyConverter(); %>
+<%! String[] currencyList = currencyConverter.getCurrencyList(); %>
+   
 <!DOCTYPE html> 
 <link rel="stylesheet" href="style.css">
 <html>
@@ -20,37 +21,42 @@
             <form action="index.jsp" method="post">
                 <label>
                     Amount:<br>
-                    <input name="sourceCurrencyAmount" type="number" step="any" min="0" required>
+                    <input name="sourceCurrencyAmount" type="number" step="any" min="0" placeholder="1.00" required>
                 </label><br>
                 <label>
                     From
                     <select name="sourceCurrency">
-                        <option value="THB">THB - Thai Baht</option>
+                        <% for(int i = 0; i < currencyList.length; i++) { %>
+                        <option value=<%=currencyConverter.getCurrencyValue(i) %>> <%=currencyConverter.getCurrency(i) %></option>
+                        <% } %>
                     </select>
                 </label>
                 <label>
                     To
                     <select name="targetCurrency">
-                        <option value="USD" deafult>USD - United States Dollar</option>
-                        <option value="VND">VND - Vietnamese Dong</option>
-                        <option value="JPY">JPY - Japanese Yen</option>
+                        <% for(int i = 0; i < currencyList.length; i++) { %>
+                        <option value=<%=currencyConverter.getCurrencyValue(i) %>> <%=currencyConverter.getCurrency(i) %></option>
+                        <% } %>
                     </select>
                 </label><br>
                 <input type="submit" value="Convert">
             </form>
         </div>
-        <jsp:setProperty name="currencyConverter" property="sourceCurrencyAmount"/>
-        <jsp:setProperty name="currencyConverter" property="sourceCurrency"/>
-        <jsp:setProperty name="currencyConverter" property="targetCurrency"/>
-        <% currencyConverter.convertCurrency(); %>
-        <jsp:setProperty name="currencyConverter" property="targetCurrencyAmount"/>
-        <%
-        double sourceCurrencyAmount = currencyConverter.getSourceCurrencyAmount();
-        String sourceCurrency = currencyConverter.getSourceCurrency();
-        double targetCurrencyAmount = currencyConverter.getTargetCurrencyAmount();
-        String targetCurrency = currencyConverter.getTargetCurrency();
-        %>
-        <h1><%= sourceCurrencyAmount%> <%=sourceCurrency%> = 
-            <%= String.format("%.5f", targetCurrencyAmount)%> <%=targetCurrency%></h1>
+        
+        <% 
+            if(request.getMethod().equals("POST")) {
+                double sourceCurrencyAmount = Double.parseDouble(request.getParameter("sourceCurrencyAmount"));
+                String sourceCurrency = request.getParameter("sourceCurrency");
+                String targetCurrency = request.getParameter("targetCurrency");
+                currencyConverter.setSourceCurrencyAmount(sourceCurrencyAmount);
+                currencyConverter.setSourceCurrency(sourceCurrency);
+                currencyConverter.setTargetCurrency(targetCurrency);
+                currencyConverter.convertCurrency(); 
+                double targetCurrencyAmount = currencyConverter.getTargetCurrencyAmount();
+                %>
+                <h1><%= sourceCurrencyAmount%> <%=sourceCurrency%> = 
+                <%= String.format("%.5f", targetCurrencyAmount)%> <%=targetCurrency%></h1>
+        <% } %>
+        
     </body>
 </html>
